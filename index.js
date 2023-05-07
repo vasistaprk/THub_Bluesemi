@@ -1,40 +1,46 @@
 const { MongoClient } = require('mongodb');
 const mongoose = require("mongoose");
+// MongoDB connectivity URL: Connection with MongoDB Atlas
 const uri = "mongodb+srv://admin:1234567890@customers.jsbdzhl.mongodb.net/";
+//Current Date extraction.
 const date = new Date().toLocaleDateString("en-IN");
+
+//Nodemailer package.
 var nodemailer = require('nodemailer');
- 
 var mandrillTransport = require('nodemailer-mandrill-transport');
- 
 var transport = nodemailer.createTransport(mandrillTransport({
   auth: {
-    apiKey: ''
+    apiKey: ''   //API key is Must.
   }
 }));
-// const userSchema = new mongoose.Schema({
-//     name: {
-//       type: String,
-//       required: true
-//     },
-//     email: {
-//       type: String,
-//       required: true,
-//       unique: true
-//     },
-//     phone:{
-//         type: String,
-//         required: false,
-//     },
-//     no_products:{
-//         type: Number,
-//         required: true,
-//     },
-//     dop:{
-//         type:String, //DD/MM/YYY
-//         required: true,
-//         default: date
-//     }
-//   });
+
+//Use The Schema function during the first run to create the schema for document in collections.
+const userSchema = new mongoose.Schema({
+    name: {
+      type: String,
+      required: true
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true
+    },
+    phone:{
+        type: String,
+        required: false,
+    },
+    no_products:{
+        type: Number,
+        required: true,
+    },
+    dop:{
+        type:String, //DD/MM/YYY
+        required: true,
+        default: date
+    }
+  });
+
+
 async function main() {
   const client = new MongoClient(uri, {
     useNewUrlParser: true,
@@ -45,15 +51,20 @@ async function main() {
     await client.connect();
     console.log("Connected to MongoDB Atlas");
 
-    // const database = client.db("Customers");
-    // const collections = database.collection("Users");
-    ////Database Operations////
-    // const docs = [
-    //     {name: "D.Sampath Kiran",email:"vasista.prk@gmail.com",phone:"+919490346894",no_products:4,dop:"12/04/2023"},
-    //     {name: "S.Alex Samson",email:"vasista9490@gmail.com",phone:"+919490346894",no_products:4,dop:"25/04/2023"},
-    //     {name: "P.Gowswami",email:"vasista3468@gmail.com",phone:"+919490346894",no_products:2,dop:"1/05/2023"}
-    //   ];
-    n=[];
+    //Cnnecting with database.
+    const database = client.db("Customers");
+    const collections = database.collection("Users");
+    //Database Operations////
+    //Inserting Data to Database.
+    const docs = [
+        {name: "D.Sampath Kiran",email:"vasista.prk@gmail.com",phone:"+919490346894",no_products:4,dop:"12/04/2023"},
+        {name: "S.Alex Samson",email:"vasista9490@gmail.com",phone:"+919490346894",no_products:4,dop:"25/04/2023"},
+        {name: "P.Gowswami",email:"vasista3468@gmail.com",phone:"+919490346894",no_products:2,dop:"1/05/2023"}
+      ];
+
+    n=[]; // array to store email addresses retrieved from Database.
+
+    //Retrieving Data from the Database.
     const data = await client.db('Customers').collection('Users').find({});
     await data.forEach(doc => {
         const ddate=doc.dop;
@@ -72,6 +83,8 @@ async function main() {
         }
         }
         );
+
+    //Sending Mails using NodeMailer.
     console.log(n);
     for(let i=0;i<n.length;i++){
         const emaild=n[i];
@@ -95,8 +108,8 @@ async function main() {
     console.log(err);
   } finally {
     // Close the connection when finished
-    // await client.close();
-    // console.log("Disconnected from MongoDB Atlas");
+    await client.close();
+    console.log("Disconnected from MongoDB Atlas");
   }
 }
 
